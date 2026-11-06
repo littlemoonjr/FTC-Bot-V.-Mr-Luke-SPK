@@ -1,2 +1,3 @@
-# FTC-Bot-V.-Mr-Luke-SPK
-you guys suck
+# Mr. Luke
+## FTC Robot | SPK
+### V 1.01
