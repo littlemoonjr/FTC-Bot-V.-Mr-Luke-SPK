@@ -23,6 +23,7 @@ public class ControllerMotorTester extends LinearOpMode {
     // Declare hardware variables for the 2 Continuous Rotation servos
     private CRServo servo0 = null;
     private CRServo servo1 = null;
+    private CRServo bringservo = null;
 
     // Declare webcam variable
     private WebcamName webcam = null;
@@ -31,7 +32,7 @@ public class ControllerMotorTester extends LinearOpMode {
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        
+       
         double power = 0.25;
 
         // Initialize drive motor hardware variables
@@ -47,6 +48,7 @@ public class ControllerMotorTester extends LinearOpMode {
         // Initialize CR servo hardware variables
         servo0 = hardwareMap.get(CRServo.class, "servo0");
         servo1 = hardwareMap.get(CRServo.class, "servo1");
+        bringservo = hardwareMap.get(CRServo.class, "bring");
 
         // Initialize webcam hardware variable
         webcam = hardwareMap.get(WebcamName.class, "mr luki");
@@ -58,8 +60,10 @@ public class ControllerMotorTester extends LinearOpMode {
         rightBack.setDirection(DcMotor.Direction.REVERSE);
 
         // Set direction for intake and shooter motors (adjust REVERSE if needed for physical mounting)
-        intake.setDirection(DcMotor.Direction.REVERSE);
+        intake.setDirection(DcMotor.Direction.FORWARD);
         shooter.setDirection(DcMotor.Direction.REVERSE);
+       
+        bringservo.setDirection(DcMotor.Direction.REVERSE);
 
         // Wait for the driver to press PLAY
         waitForStart();
@@ -83,6 +87,10 @@ public class ControllerMotorTester extends LinearOpMode {
             }
 
             // CR SERVO FEATURE: If B button is pressed, spin servo0 (clockwise) and servo1 (counterclockwise). Otherwise, stop.
+            telemetry.addData("Moving Servos", gamepad1.b);
+            telemetry.addData("Moving Bring Servo", gamepad1.a);
+
+
             if (gamepad1.b) {
                 servo0.setPower(1.0);   // Clockwise
                 servo1.setPower(-1.0);  // Counterclockwise
@@ -90,32 +98,38 @@ public class ControllerMotorTester extends LinearOpMode {
                 servo0.setPower(0.0);   // Stop
                 servo1.setPower(0.0);   // Stop
             }
+           
+            if (gamepad1.a) {
+                bringservo.setPower(1.0);   // Clockwise
+            } else {
+                bringservo.setPower(0.0);   // Stop
+            }
 
             // INTAKE FEATURE:
             // Left Bumper = Intake forward (100% power)
             // Left Trigger = Reverse intake / eject (proportional to trigger press)
             if (gamepad1.left_bumper) {
-                intake.setPower(1.0);
+                intake.setPower(.25);
             } else if (gamepad1.left_trigger > 0.1) {
-                intake.setPower(-gamepad1.left_trigger);
+                intake.setPower(-(gamepad1.left_trigger * 0.25));
             } else {
                 intake.setPower(0.0);
             }
 
             // SHOOTER FEATURE: Controlled by Right Trigger (variable velocity up to 100%)
-            
-            
+           
+           
             if (gamepad1.dpad_down) {
                 power -= 0.001;
             }
             if (gamepad1.dpad_up) {
                 power += 0.001;
             }
-            
+           
             shooter.setPower(gamepad1.right_trigger * power);
-            
-            
-            
+           
+           
+           
 
             // Calculate power for each mecanum wheel
             double lfPower = drive + strafe + turn;
